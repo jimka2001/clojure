@@ -1717,7 +1717,9 @@ of parameters as well."
   (let [[raw-params [rest offset]] (extract-params s offset)
         [_ [rest offset flags]] (extract-flags rest offset)
         directive (first rest)
-        def (get directive-table (Character/toUpperCase ^Character directive))
+        ;; prevent (cl-format true "~") and the like from throwing java exception,
+        ;; thus allowing error handling code below to be reached.
+        def (if directive (get directive-table (Character/toUpperCase ^Character directive)))
         params (if def (map-params def (map translate-param raw-params) flags offset))]
     (if (not directive)
       (format-error "Format string ended in the middle of a directive" offset))
